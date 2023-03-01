@@ -1,10 +1,9 @@
 
 apply plugin: 'groovy'
-apply plugin: 'idea'
 
 ext {
-    androidGradleVersion = '3.2.0'
-    assistVersion = '3.24.1-GA'
+    androidGradleVersion = '7.3.0'
+    assistVersion = '3.29.0-GA'
 }
 
 repositories {
@@ -13,12 +12,17 @@ repositories {
     maven { url "https://maven.google.com" }
     jcenter()
 }
-
+def asm_version ='9.1'
 dependencies {
-    compile localGroovy()
-    compile gradleApi()
-    compile "org.javassist:javassist:$assistVersion" //'3.24.1-GA'
-    compile "com.android.tools.build:gradle:$androidGradleVersion"
+//    implementation localGroovy()
+    implementation gradleApi()
+    implementation "org.javassist:javassist:$assistVersion" //'3.24.1-GA'
+    implementation "com.android.tools.build:gradle:$androidGradleVersion"
+    implementation "commons-io:commons-io:2.6"
+    implementation "com.google.guava:guava:30.1-jre"
+    implementation "org.ow2.asm:asm:${asm_version}"
+    implementation "org.ow2.asm:asm-commons:${asm_version}"
+    implementation "org.ow2.asm:asm-tree:${asm_version}"
 }
 
 sourceSets {

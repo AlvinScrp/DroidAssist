@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply from: rootProject.file('jacoco.gradle')
 
 android {
     compileSdkVersion 28
@@ -35,7 +35,9 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
 }
 
-apply plugin: 'com.didichuxing.tools.droidassist'
+import com.didichuxing.tools.droidassist.AssistPlugin
+apply plugin: AssistPlugin
+apply plugin: 'org.jetbrains.kotlin.android'
 droidAssistOptions {
     enable true
     logLevel 3

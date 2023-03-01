@@ -1,12 +1,18 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        google()
+    }
+}
+
+
 apply plugin: 'groovy'
 apply plugin: 'java'
+apply plugin: 'java-gradle-plugin'
+apply plugin: 'maven-publish'
 
-apply from: 'upload.gradle'
-
-group = GROUP_ID
-version = VERSION
-project.archivesBaseName = ARTIFACT_ID
-
+//apply from: 'upload.gradle'
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
@@ -23,15 +29,42 @@ sourceSets {
         }
     }
 }
+def asm_version ='9.1'
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    testCompile "com.android.tools.build:gradle:$androidGradleVersion"
 
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile gradleApi()
-    compile localGroovy()
+    implementation  fileTree(dir: 'libs', include: ['*.jar'])
+    implementation gradleApi()
+//    implementation localGroovy()
     compileOnly "com.android.tools.build:gradle:$androidGradleVersion"
 
-    compile "org.javassist:javassist:$assistVersion" //'3.24.0-GA'
+    implementation "org.javassist:javassist:$assistVersion" //'3.24.0-GA'
+
+    implementation "commons-io:commons-io:2.6"
+    implementation "com.google.guava:guava:30.1-jre"
+    implementation "org.ow2.asm:asm:${asm_version}"
+    implementation "org.ow2.asm:asm-commons:${asm_version}"
+    implementation "org.ow2.asm:asm-tree:${asm_version}"
+}
+
+
+group 'com.a.assist'
+version '0.0.6-alpha01'
+
+gradlePlugin {
+    plugins {
+        create("assist") {
+            id = 'com.a.plugin.assist'
+            implementationClass = 'com.didichuxing.tools.droidassist.AssistPlugin'
+        }
+
+    }
+}
+publishing {
+    repositories {
+        maven {
+//            url '../repo'
+            url '/Users/canglong/Documents/android_project/fxj/repo'
+        }
+    }
 }

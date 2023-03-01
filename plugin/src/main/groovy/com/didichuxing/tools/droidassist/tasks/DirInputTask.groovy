@@ -37,6 +37,9 @@ class DirInputTask extends InputTask<DirectoryInput> {
         def executor = new WorkerExecutor(1)
         List<File> files = Lists.newArrayList()
 
+        println("taskInput.incremental：${taskInput.incremental}")
+        println("temporaryDir：${temporaryDir.absolutePath}")
+
         if (taskInput.incremental) {
             //process changedFiles in incremental mode.
             //if file is removed, delete corresponding dest file.
@@ -60,6 +63,7 @@ class DirInputTask extends InputTask<DirectoryInput> {
             }
         } else {
             //process every class file in Non-incremental mode
+            println("taskInput.dest:${taskInput.dest}")
             executor.execute {
                 FileUtils.copyDirectory(inputDir, taskInput.dest)
             }
@@ -73,6 +77,7 @@ class DirInputTask extends InputTask<DirectoryInput> {
 
             files.addAll(fileList)
         }
+        println("tempDir:${temporaryDir.absolutePath}")
 
         files.stream()
                 .filter { it.isFile() }//Path to file
@@ -87,6 +92,7 @@ class DirInputTask extends InputTask<DirectoryInput> {
     }
 
     void executeClass(File classFile, File inputDir, File tempDir) {
+        println("executeClass: ${classFile.absolutePath}")
         def className =
                 FilenameUtils.
                         removeExtension(

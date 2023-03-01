@@ -44,14 +44,17 @@ class ZipUtils {
     }
 
     static void zipAppend(File srcFile, File destFile, File dir) {
+        println("-")
+        println("srcFile:${srcFile.absolutePath},destFile:${destFile.absolutePath},tempdir:${dir}")
+        println("-")
         ant.zip(destfile: destFile.absolutePath) {
             zipfileset(dir: dir.absolutePath)
-            def basedirPath = dir.toPath()
-            def excludes = Files.walk(dir.toPath())
-                    .parallel()
-                    .map { basedirPath.relativize(it).toString() }
-                    .collect(Collectors.joining(","))
-            zipfileset(src: srcFile.absolutePath, excludes: excludes)
+//            def basedirPath = dir.toPath()
+//            def excludes = Files.walk(dir.toPath())
+//                    .parallel()
+//                    .map { basedirPath.relativize(it).toString() }
+//                    .collect(Collectors.joining(","))
+//            zipfileset(src: srcFile.absolutePath, excludes: excludes)
         }
     }
 }

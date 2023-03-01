@@ -48,8 +48,13 @@ public final class ExampleSpec implements IInterface {
 
     @TestAnnotation3
     public void uncaught2() {
-        System.out.println("uncaught2");
-        int i = 1 / 0;
+        try {
+            System.out.println("uncaught2");
+            int i = 1 / 0;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     public void timing() {

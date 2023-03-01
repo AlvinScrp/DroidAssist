@@ -1,5 +1,6 @@
 package com.didichuxing.tools.droidassist.tasks
 
+import com.a.plugin.cc.Coverage
 import com.android.build.api.transform.QualifiedContent
 import com.didichuxing.tools.droidassist.DroidAssistContext
 import com.didichuxing.tools.droidassist.DroidAssistExecutor.BuildContext
@@ -9,9 +10,9 @@ import com.didichuxing.tools.droidassist.ex.DroidAssistNotFoundException
 import com.didichuxing.tools.droidassist.util.IOUtils
 import com.didichuxing.tools.droidassist.util.Logger
 import javassist.CannotCompileException
+import javassist.CtClass
 import javassist.NotFoundException
-
-import static com.android.utils.FileUtils.cleanOutputDir
+import org.apache.commons.io.FileUtils
 
 /**
  * Interface to process QualifiedContent.
@@ -66,49 +67,89 @@ abstract class InputTask<T extends QualifiedContent> implements Runnable {
                 "${buildContext.temporaryDir}/" +
                         "${inputType}/" +
                         "${taskInput.input.name.replace(":", "-")}")
-        cleanOutputDir(dir)
+        if (dir.exists()) {
+            if (dir.isDirectory()) {
+                org.apache.commons.io.FileUtils.cleanDirectory(dir)
+            } else if (dir.isFile()) {
+                FileUtils.forceDelete(dir)
+            }
+        }
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
         return dir
     }
 
     boolean executeClass(String className, File directory) {
+        println("executeClass:${className}")
+        if (className.contains("module-info") || className.contains("META-INF.")) {
+            return false
+        }
         buildContext.totalCounter.incrementAndGet()
-        def inputClass = null
+        CtClass inputClass = null
         def transformers = context.transformers.findAll {
             it.classAllowed(className)
         }
 
-        if (transformers.isEmpty()) {
-            return false
-        }
+//        if (transformers.isEmpty()) {
+//            return false
+//        }
 
         inputClass = context.classPool.getOrNull(className)
         if (inputClass == null) {
             return false
         }
 
+//        def needCoverage = Coverage.matches(className)
+//        if (needCoverage) {
+//            def classBytes = inputClass.toBytecode()
+//            def instrumentBytes = Coverage.instrument(className, classBytes)
+//            InputStream sbs = new ByteArrayInputStream(instrumentBytes);
+//            inputClass.detach()
+//            inputClass = context.classPool.makeClass(sbs)
+//            if (inputClass.isFrozen()) {
+//                inputClass.defrost()
+//            }
+//        }
+
         transformers.each {
             try {
                 it.performTransform(inputClass, className)
-            } catch (NotFoundException e) {
-                throw new DroidAssistNotFoundException(
-                        "Transform failed for class: ${className}" +
-                                " with not found exception: ${e.cause?.message}", e)
-            } catch (CannotCompileException e) {
-                throw new DroidAssistBadStatementException(
-                        "Transform failed for class: ${className} " +
-                                "with compile error: ${e.cause?.message}", e)
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new DroidAssistException(
-                        "Transform failed for class: ${className} " +
-                                "with error: ${e.cause?.message}", e)
+                        "Transform failed for class: ${className}" +
+                                " with  exception: ${e.cause?.message}", e)
             }
         }
 
-        if (inputClass.modified) {
+
+//        println("inputClass.needCoverage:${needCoverage}")
+//        println("inputClass.modified:${inputClass.modified}")
+//        if (needCoverage || inputClass.modified) {
+//            buildContext.affectedCounter.incrementAndGet()
+//            inputClass.writeFile(directory.absolutePath)
+//            return true
+//        }
+
+
+        def needCoverage = Coverage.matches(className)
+        if (needCoverage) {
+            def classBytes = inputClass.toBytecode()
+            Coverage.instrumentAndSave(className, classBytes, directory)
+            println("inputClass.needCoverage:${needCoverage}")
+            buildContext.affectedCounter.incrementAndGet()
+            return true
+        }
+        else if (inputClass.modified) {
+            println("inputClass.modified:${inputClass.modified}")
             buildContext.affectedCounter.incrementAndGet()
             inputClass.writeFile(directory.absolutePath)
             return true
         }
-        return false
+//        return false
+//        println("inputClass.modified:${inputClass.modified}")
+        buildContext.affectedCounter.incrementAndGet()
+        inputClass.writeFile(directory.absolutePath)
+        return true
     }
 }
