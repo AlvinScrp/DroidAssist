@@ -1,0 +1,66 @@
+apply plugin: 'jacoco'
+jacoco {
+    toolVersion = "0.8.7"
+}
+//这个就是具体解析ec文件的任务，会根据我们指定的class路径、源码路径、ec路径进行解析输出
+def fileFilter = [
+        '**/databinding/*Binding.*',
+        '**/databinding/*BindingImpl.*',
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        'android/**/*.*',
+        // kotlin
+        '**/*MapperImpl*.*',
+        '**/DataBindingTriggerClass.*',
+        '**/*$ViewInjector*.*',
+        '**/*$ViewBinder*.*',
+        '**/BuildConfig.*',
+        '**/*Component*.*',
+        '**/*BR*.*',
+        '**/Manifest*.*',
+        '**/*Companion*.*',
+        '**/*_Factory*.*',
+        '**/*_Provide*Factory*.*',
+        '**/*Extensions*.*'
+]
+def moduleProjects = project.rootProject.subprojects
+println("================")
+moduleProjects.forEach { print("${it.name} , ") }
+println("================")
+def sourceDirs = moduleProjects.collect { "${it.projectDir}/src/main/java" }
+def javaClassDir = moduleProjects.collect { "${it.projectDir}/build/intermediates/javac/debug" }
+def kotlinClassDir = moduleProjects.collect { "${it.projectDir}/build/tmp/kotlin-classes/debug" }
+def classDirPaths = javaClassDir + kotlinClassDir
+def classFileTrees =
+        classDirPaths.collect {
+            fileTree(dir: it, excludes: fileFilter , includes: ['**/com/didichuxing/tools/**'])
+        }
+
+task jacocoTestReport(type: JacocoReport) {
+    group = "JacocoReport"
+    description = "Generate Jacoco coverage reports after running tests."
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    sourceDirectories.setFrom(files(sourceDirs))
+    classDirectories.setFrom(classFileTrees)
+    executionData.setFrom(files("$rootDir/build/ec/aa.ec"))
+    doFirst {
+        //遍历class路径下的所有文件，替换字符
+        classDirPaths.each { path ->
+            def dir=  new File(path)
+            if(dir.exists()){
+                dir.eachFileRecurse { file ->
+                    if (file.name.contains('$$')) {
+                        file.renameTo(file.path.replace('$$', '$'))
+                    }
+                }
+            }
+        }
+    }
+
+}

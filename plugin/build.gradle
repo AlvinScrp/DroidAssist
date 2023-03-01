@@ -29,6 +29,7 @@ sourceSets {
         }
     }
 }
+def asm_version ='9.1'
 
 dependencies {
 
@@ -39,6 +40,11 @@ dependencies {
 
     implementation "org.javassist:javassist:$assistVersion" //'3.24.0-GA'
 
+    implementation "commons-io:commons-io:2.6"
+    implementation "com.google.guava:guava:30.1-jre"
+    implementation "org.ow2.asm:asm:${asm_version}"
+    implementation "org.ow2.asm:asm-commons:${asm_version}"
+    implementation "org.ow2.asm:asm-tree:${asm_version}"
 }
 
 

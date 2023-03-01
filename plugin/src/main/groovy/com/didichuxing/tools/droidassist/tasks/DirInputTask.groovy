@@ -104,6 +104,9 @@ class DirInputTask extends InputTask<DirectoryInput> {
                                         .relativize(classFile.toPath())
                                         .toString())
                         .replace(File.separator, '.')
+//        if (Coverage.matches(className)) {
+//            Coverage.instrumentAndSave(className, classFile,inputDir, tempDir)
+//        }
         executeClass(className, tempDir)
     }
 

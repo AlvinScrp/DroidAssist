@@ -47,6 +47,12 @@ public class MainActivity extends Activity implements IInterface.Callback<String
 
             }
         });
+        findViewById(R.id.btnGenJacoco).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                JacocoHelpe.generateCoverageFile(MainActivity.this);
+            }
+        });
 
         Button button = new Button(this);
 
