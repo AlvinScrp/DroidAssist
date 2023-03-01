@@ -10,7 +10,7 @@ import org.gradle.api.Project
 /**
  * Plugin entrance
  */
-class DroidAssistPlugin implements Plugin<Project> {
+class AssistPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {

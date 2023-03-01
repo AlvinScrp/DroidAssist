@@ -4,8 +4,13 @@ import com.android.build.api.transform.DirectoryInput
 import com.android.build.api.transform.Status
 import com.didichuxing.tools.droidassist.DroidAssistContext
 import com.didichuxing.tools.droidassist.DroidAssistExecutor.BuildContext
+import com.didichuxing.tools.droidassist.ex.DroidAssistBadStatementException
+import com.didichuxing.tools.droidassist.ex.DroidAssistException
+import com.didichuxing.tools.droidassist.ex.DroidAssistNotFoundException
 import com.didichuxing.tools.droidassist.util.WorkerExecutor
 import com.google.common.collect.Lists
+import javassist.CannotCompileException
+import javassist.NotFoundException
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 
@@ -37,6 +42,9 @@ class DirInputTask extends InputTask<DirectoryInput> {
         def executor = new WorkerExecutor(1)
         List<File> files = Lists.newArrayList()
 
+        println("taskInput.incremental：${taskInput.incremental}")
+        println("temporaryDir：${temporaryDir.absolutePath}")
+
         if (taskInput.incremental) {
             //process changedFiles in incremental mode.
             //if file is removed, delete corresponding dest file.
@@ -60,6 +68,7 @@ class DirInputTask extends InputTask<DirectoryInput> {
             }
         } else {
             //process every class file in Non-incremental mode
+            println("taskInput.dest:${taskInput.dest}")
             executor.execute {
                 FileUtils.copyDirectory(inputDir, taskInput.dest)
             }
@@ -73,10 +82,10 @@ class DirInputTask extends InputTask<DirectoryInput> {
 
             files.addAll(fileList)
         }
-
         files.stream()
                 .filter { it.isFile() }//Path to file
                 .filter { it.name.endsWith(DOT_CLASS) }//Filter class file
+                .filter { !it.name.contains("module-info") }
                 .forEach { executeClass(it, inputDir, temporaryDir) }
 
         executor.execute {
@@ -87,6 +96,7 @@ class DirInputTask extends InputTask<DirectoryInput> {
     }
 
     void executeClass(File classFile, File inputDir, File tempDir) {
+        println("executeClass: ${classFile.absolutePath}")
         def className =
                 FilenameUtils.
                         removeExtension(
@@ -103,5 +113,47 @@ class DirInputTask extends InputTask<DirectoryInput> {
         }
         Path relativePath = baseDir.toPath().relativize(file.toPath())
         Paths.get(destDir.absolutePath, relativePath.toString()).toFile()
+    }
+
+    boolean executeClass(String className, File directory) {
+        buildContext.totalCounter.incrementAndGet()
+        def inputClass = null
+        def transformers = context.transformers.findAll {
+            it.classAllowed(className)
+        }
+
+        if (transformers.isEmpty()) {
+            return false
+        }
+
+        inputClass = context.classPool.getOrNull(className)
+        if (inputClass == null) {
+            return false
+        }
+
+        transformers.each {
+            try {
+                it.performTransform(inputClass, className)
+            } catch (NotFoundException e) {
+                throw new DroidAssistNotFoundException(
+                        "Transform failed for class: ${className}" +
+                                " with not found exception: ${e.cause?.message}", e)
+            } catch (CannotCompileException e) {
+                throw new DroidAssistBadStatementException(
+                        "Transform failed for class: ${className} " +
+                                "with compile error: ${e.cause?.message}", e)
+            } catch (Throwable e) {
+                throw new DroidAssistException(
+                        "Transform failed for class: ${className} " +
+                                "with error: ${e.cause?.message}", e)
+            }
+        }
+
+        if (inputClass.modified) {
+            buildContext.affectedCounter.incrementAndGet()
+            inputClass.writeFile(directory.absolutePath)
+            return true
+        }
+        return false
     }
 }

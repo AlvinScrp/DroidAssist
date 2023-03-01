@@ -16,7 +16,7 @@ import static com.android.utils.FileUtils.cleanOutputDir
 /**
  * Interface to process QualifiedContent.
  *
- * <p> It provides the ability to handle classes, see {@link #executeClass}
+ * <p> It provides the ability to handle classes, see {@link # executeClass}
  */
 abstract class InputTask<T extends QualifiedContent> implements Runnable {
 
@@ -70,45 +70,5 @@ abstract class InputTask<T extends QualifiedContent> implements Runnable {
         return dir
     }
 
-    boolean executeClass(String className, File directory) {
-        buildContext.totalCounter.incrementAndGet()
-        def inputClass = null
-        def transformers = context.transformers.findAll {
-            it.classAllowed(className)
-        }
 
-        if (transformers.isEmpty()) {
-            return false
-        }
-
-        inputClass = context.classPool.getOrNull(className)
-        if (inputClass == null) {
-            return false
-        }
-
-        transformers.each {
-            try {
-                it.performTransform(inputClass, className)
-            } catch (NotFoundException e) {
-                throw new DroidAssistNotFoundException(
-                        "Transform failed for class: ${className}" +
-                                " with not found exception: ${e.cause?.message}", e)
-            } catch (CannotCompileException e) {
-                throw new DroidAssistBadStatementException(
-                        "Transform failed for class: ${className} " +
-                                "with compile error: ${e.cause?.message}", e)
-            } catch (Throwable e) {
-                throw new DroidAssistException(
-                        "Transform failed for class: ${className} " +
-                                "with error: ${e.cause?.message}", e)
-            }
-        }
-
-        if (inputClass.modified) {
-            buildContext.affectedCounter.incrementAndGet()
-            inputClass.writeFile(directory.absolutePath)
-            return true
-        }
-        return false
-    }
 }

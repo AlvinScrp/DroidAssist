@@ -1,6 +1,5 @@
 package com.didichuxing.tools.droidassist
 
-import com.android.annotations.NonNull
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.didichuxing.tools.droidassist.util.GradleUtils
@@ -68,7 +67,7 @@ class DroidAssistTransform extends Transform {
                 SecondaryFile.nonIncremental(project.files(gradleExtension.config)))
     }
 
-    void transform(@NonNull TransformInvocation invocation)
+    void transform( TransformInvocation invocation)
             throws TransformException, InterruptedException, IOException {
         try {
             def logLevel = gradleExtension.logLevel

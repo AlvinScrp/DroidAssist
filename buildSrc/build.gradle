@@ -1,10 +1,9 @@
 
 apply plugin: 'groovy'
-apply plugin: 'idea'
 
 ext {
     androidGradleVersion = '3.2.0'
-    assistVersion = '3.24.1-GA'
+    assistVersion = '3.29.0-GA'
 }
 
 repositories {
@@ -15,10 +14,10 @@ repositories {
 }
 
 dependencies {
-    compile localGroovy()
-    compile gradleApi()
-    compile "org.javassist:javassist:$assistVersion" //'3.24.1-GA'
-    compile "com.android.tools.build:gradle:$androidGradleVersion"
+//    implementation localGroovy()
+    implementation gradleApi()
+    implementation "org.javassist:javassist:$assistVersion" //'3.24.1-GA'
+    implementation "com.android.tools.build:gradle:$androidGradleVersion"
 }
 
 sourceSets {

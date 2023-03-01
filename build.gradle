@@ -9,8 +9,6 @@ buildscript {
 
     dependencies {
         classpath "com.android.tools.build:gradle:3.2.0"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
     }
 }
 
@@ -18,8 +16,8 @@ buildscript {
 ext {
     lintVersion = '26.0.1'
     kotlinVersion = '1.2.31'
-    androidGradleVersion = '3.0.0'
-    assistVersion = '3.24.0-GA'
+    androidGradleVersion = '3.2.0'
+    assistVersion = '3.29.0-GA'
 }
 
 allprojects {

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 
 /**
@@ -24,9 +25,28 @@ public class MainActivity extends Activity implements IInterface.Callback<String
         Log.d(TAG, "constructor: ");
     }
 
+    private TextView tv;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        tv = findViewById(R.id.tv);
+
+        findViewById(R.id.btn1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                valueClick.onOkClick();
+            }
+        });
+        findViewById(R.id.btn2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                valueClick.onBadClick();
+
+            }
+        });
 
         Button button = new Button(this);
 
@@ -64,7 +84,7 @@ public class MainActivity extends Activity implements IInterface.Callback<String
         //Enhance
 
         //Try catch test
-        startActivity(new Intent());//will crash here, test crash
+//        startActivity(new Intent());//will crash here, test crash
         //Timing test
         ExampleSpec test4 = new ExampleSpec(1, 2);
         test4.timing();
@@ -83,5 +103,51 @@ public class MainActivity extends Activity implements IInterface.Callback<String
     @Override
     public void onCallback(String value) {
         System.out.println("onCallback");
+        dosss("sdsds");
     }
+
+    public void dosss(String value) {
+        System.out.println(value);
+    }
+
+
+    private void updateText(boolean ok) {
+        String text = "";
+        if (ok) {
+            text = getOKText();
+        } else {
+            text = getBadCode();
+        }
+
+        tv.setText(text);
+    }
+
+    private String getOKText() {
+        return "OK!!!!";
+    }
+
+    private String getBadCode() {
+        return "Bad!";
+    }
+
+
+    OnEventListener valueClick = new OnEventListener() {
+        @Override
+        public void onOkClick() {
+            updateText(true);
+        }
+
+        @Override
+        public void onBadClick() {
+            updateText(false);
+        }
+    };
+
+    interface OnEventListener {
+        void onOkClick();
+
+        void onBadClick();
+    }
+
+
 }
