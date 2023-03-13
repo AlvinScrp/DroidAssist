@@ -96,7 +96,7 @@ class DirInputTask extends InputTask<DirectoryInput> {
     }
 
     void executeClass(File classFile, File inputDir, File tempDir) {
-        println("executeClass: ${classFile.absolutePath}")
+//        println("executeClass: ${classFile.absolutePath}")
         def className =
                 FilenameUtils.
                         removeExtension(
@@ -150,6 +150,7 @@ class DirInputTask extends InputTask<DirectoryInput> {
         }
 
         if (inputClass.modified) {
+            println("modified Class: ${classFile.absolutePath}")
             buildContext.affectedCounter.incrementAndGet()
             inputClass.writeFile(directory.absolutePath)
             return true
