@@ -41,9 +41,9 @@ dependencies {
 
 }
 
-//.gradlew publishPluginMavenPublicationToMavenRepository
+//./gradlew publishPluginMavenPublicationToMavenRepository
 group 'com.a.assist'
-version '0.0.1-alpha02'
+version '0.0.1-alpha03'
 
 gradlePlugin {
     plugins {
@@ -57,8 +57,8 @@ gradlePlugin {
 publishing {
     repositories {
         maven {
-//            url '../repo'
-            url '/Users/canglong/Documents/android_project/fxj2/repo'
+            url '../repo'
+//            url '/Users/canglong/Documents/android_project/fxj2/repo'
         }
     }
 }

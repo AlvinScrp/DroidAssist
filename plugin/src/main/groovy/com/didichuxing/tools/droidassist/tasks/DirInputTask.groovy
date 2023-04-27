@@ -150,7 +150,6 @@ class DirInputTask extends InputTask<DirectoryInput> {
         }
 
         if (inputClass.modified) {
-            println("modified Class: ${classFile.absolutePath}")
             buildContext.affectedCounter.incrementAndGet()
             inputClass.writeFile(directory.absolutePath)
             return true
